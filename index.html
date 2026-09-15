@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f8fa">
+  <meta name="description" content="사진 속 단어를 담고, 가리고, 시험 보는 모바일 영어 단어장">
+  <title>포켓 단어장</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%231d6ff2'/%3E%3Cpath d='M18 17h21a7 7 0 0 1 7 7v23H25a7 7 0 0 1-7-7V17Z' fill='white'/%3E%3Cpath d='M25 47a7 7 0 0 1 7-7h14' fill='none' stroke='%231d6ff2' stroke-width='4'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand-wrap">
+        <div class="brand-mark" aria-hidden="true">V</div>
+        <div>
+          <p class="eyebrow">MY VOCAB</p>
+          <h1>포켓 단어장</h1>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="chapter-button" id="chapterButton" type="button" aria-label="학습 챕터 선택"><span id="activeChapterLabel">전체</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></button>
+        <button class="icon-button" id="filterButton" type="button" aria-label="표시 정보 설정" title="표시 정보 설정">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10M14 4v6M6 14v6"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <section id="wordbookView" class="view active" aria-labelledby="wordbookTitle">
+        <div class="hero-row">
+          <div>
+            <p class="date-label" id="todayLabel"></p>
+            <h2 id="wordbookTitle">오늘도 한 단어씩</h2>
+          </div>
+          <div class="count-badge"><strong id="wordCount">0</strong><span>단어</span></div>
+        </div>
+
+        <div class="primary-actions">
+          <button class="action-card action-primary" id="openAddButton" type="button">
+            <span class="action-icon">＋</span>
+            <span><strong>직접 추가</strong><small>단어와 뜻 입력하기</small></span>
+          </button>
+          <button class="action-card" id="openOcrButton" type="button">
+            <span class="action-icon camera-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M4 7.5h3l1.4-2h7.2l1.4 2h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+            </span>
+            <span><strong>파일에서 추가</strong><small>사진 · 엑셀 지원</small></span>
+          </button>
+        </div>
+
+        <div class="mask-panel" aria-label="암기 가리기 설정">
+          <div class="panel-heading">
+            <div><span class="spark" aria-hidden="true">✦</span><strong>암기 모드</strong></div>
+            <button class="text-button" id="revealAllButton" type="button">전체 정답 보기</button>
+          </div>
+          <div class="switch-row">
+            <label class="switch-item"><span>영어 가리기</span><input type="checkbox" id="maskWord"><i></i></label>
+            <label class="switch-item"><span>뜻 가리기</span><input type="checkbox" id="maskMeaning"><i></i></label>
+            <label class="switch-item"><span>추가정보 가리기</span><input type="checkbox" id="maskDetails"><i></i></label>
+          </div>
+        </div>
+
+        <div class="tools-row">
+          <label class="search-box">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
+            <input id="searchInput" type="search" placeholder="단어 또는 뜻 검색" autocomplete="off">
+          </label>
+          <div class="view-toggle" role="group" aria-label="보기 방식">
+            <button id="cardViewButton" class="active" type="button" aria-label="카드 보기"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 9h8M8 13h5"/></svg></button>
+            <button id="listViewButton" type="button" aria-label="리스트 보기"><svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="5" cy="6" r="1"/><circle cx="5" cy="12" r="1"/><circle cx="5" cy="18" r="1"/></svg></button>
+          </div>
+        </div>
+
+        <div id="wordsContainer" class="words-grid" aria-live="polite"></div>
+        <div id="emptyState" class="empty-state hidden">
+          <div class="empty-icon">Aa</div>
+          <h3>아직 담긴 단어가 없어요</h3>
+          <p>직접 입력하거나 단어장 사진을 불러와 보세요.</p>
+          <button type="button" class="button primary" id="emptyAddButton">첫 단어 추가하기</button>
+        </div>
+      </section>
+
+      <section id="testView" class="view" aria-labelledby="testTitle">
+        <div id="testIntro" class="test-intro">
+          <button class="back-button" data-go-home type="button"><span>←</span> 단어장</button>
+          <div class="test-orb" aria-hidden="true">?</div>
+          <p class="eyebrow">QUICK TEST</p>
+          <h2 id="testTitle">얼마나 외웠는지<br>확인해 볼까요?</h2>
+          <p>저장된 단어에서 최대 10문제를 뽑아 확인해요.</p>
+          <div class="test-options">
+            <label><input type="radio" name="direction" value="word" checked><span><strong>영어 → 뜻</strong><small>영단어를 보고 뜻 고르기</small></span></label>
+            <label><input type="radio" name="direction" value="meaning"><span><strong>뜻 → 영어</strong><small>뜻을 보고 영단어 고르기</small></span></label>
+            <label><input type="radio" name="direction" value="example"><span><strong>예문 → 영어</strong><small>예문 속 빈칸에 들어갈 단어 고르기</small></span></label>
+          </div>
+          <button class="button primary large" id="startTestButton" type="button">시험 시작</button>
+          <p class="test-note" id="testAvailability"></p>
+        </div>
+
+        <div id="quizArea" class="quiz-area hidden">
+          <div class="quiz-top">
+            <button class="icon-button plain" id="quitTestButton" type="button" aria-label="시험 종료">×</button>
+            <div class="quiz-progress"><span id="quizProgressText">1 / 5</span><div><i id="quizProgressBar"></i></div></div>
+            <span class="score-chip" id="liveScore">0점</span>
+          </div>
+          <div class="question-card">
+            <p>알맞은 답을 골라주세요</p>
+            <h2 id="questionText"></h2>
+            <div id="answerOptions" class="answer-options"></div>
+          </div>
+          <button id="nextQuestionButton" class="button primary large hidden" type="button">다음 문제</button>
+        </div>
+
+        <div id="resultArea" class="result-area hidden">
+          <div class="result-ring"><strong id="resultScore">0</strong><span>점</span></div>
+          <p class="eyebrow">TEST COMPLETE</p>
+          <h2 id="resultMessage">수고했어요!</h2>
+          <p id="resultDetail"></p>
+          <div id="wrongAnswers" class="wrong-answers"></div>
+          <button class="button primary large" id="retryTestButton" type="button">다시 풀기</button>
+          <button class="button ghost large" data-go-home type="button">단어장으로 돌아가기</button>
+        </div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="주요 메뉴">
+      <button class="active" data-nav="wordbook" type="button"><svg viewBox="0 0 24 24"><path d="M5 4h10a4 4 0 0 1 4 4v12H9a4 4 0 0 1-4-4z"/><path d="M9 20a4 4 0 0 1 4-4h6"/></svg><span>단어장</span></button>
+      <button data-nav="test" type="button"><svg viewBox="0 0 24 24"><path d="M9 4h6M9 20h6M7 4h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="m9 11 2 2 4-4"/></svg><span>시험</span></button>
+    </nav>
+  </div>
+
+  <div class="modal-backdrop hidden" id="editModal" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-header"><div><p class="eyebrow">WORD DETAILS</p><h2 id="editModalTitle">새 단어 추가</h2></div><button class="icon-button plain close-modal" type="button" aria-label="닫기">×</button></div>
+      <form id="wordForm">
+        <input type="hidden" id="wordId">
+        <div class="form-grid primary-fields">
+          <label><span>영단어 <b>*</b></span><input id="wordInput" required placeholder="예: resilient" autocomplete="off"></label>
+          <label><span>챕터</span><select id="chapterInput"></select></label>
+          <label class="full"><span>뜻 <b>*</b> <small>여러 뜻은 줄바꿈으로 입력</small></span><textarea id="meaningInput" required rows="3" placeholder="예: 회복력이 있는&#10;탄력 있는"></textarea></label>
+        </div>
+        <button id="generateDetailsButton" class="generate-button" type="button"><span>✦</span> 영어·뜻만 입력했다면 추가 정보 자동 채우기</button>
+        <div class="section-divider"><span>추가 정보</span></div>
+        <div class="form-grid">
+          <label class="full"><span>영영 풀이</span><textarea id="definitionInput" rows="2" placeholder="able to recover quickly from difficulty"></textarea></label>
+          <label class="full"><span>예문</span><textarea id="exampleInput" rows="2" placeholder="She remained resilient through change."></textarea></label>
+          <label><span>동의어</span><input id="synonymsInput" placeholder="strong, flexible"></label>
+          <label><span>반의어</span><input id="antonymsInput" placeholder="fragile"></label>
+          <label><span>파생어</span><input id="derivedInput" placeholder="resilience, resiliently"></label>
+          <label class="full"><span>유의어</span><input id="relatedInput" placeholder="durable, adaptable"></label>
+        </div>
+        <div class="modal-actions"><button type="button" class="button ghost close-modal">취소</button><button type="submit" class="button primary">저장하기</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="filterModal" role="dialog" aria-modal="true" aria-labelledby="filterTitle">
+    <div class="modal-sheet compact-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-header"><div><p class="eyebrow">DISPLAY</p><h2 id="filterTitle">표시할 추가 정보</h2></div><button class="icon-button plain close-filter" type="button" aria-label="닫기">×</button></div>
+      <p class="modal-description">단어 카드에 함께 보고 싶은 항목을 골라주세요.</p>
+      <div id="detailFilters" class="check-list">
+        <label><span><i>EN</i><strong>영영 풀이</strong></span><input type="checkbox" value="definition" checked></label>
+        <label><span><i>“ ”</i><strong>예문</strong></span><input type="checkbox" value="example" checked></label>
+        <label><span><i>≈</i><strong>동의어</strong></span><input type="checkbox" value="synonyms" checked></label>
+        <label><span><i>↔</i><strong>반의어</strong></span><input type="checkbox" value="antonyms" checked></label>
+        <label><span><i>↳</i><strong>파생어</strong></span><input type="checkbox" value="derived" checked></label>
+        <label><span><i>+</i><strong>유의어</strong></span><input type="checkbox" value="related" checked></label>
+      </div>
+      <button class="button primary large close-filter" type="button">적용하기</button>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="ocrModal" role="dialog" aria-modal="true" aria-labelledby="ocrTitle">
+    <div class="modal-sheet ocr-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-header"><div><p class="eyebrow">IMPORT</p><h2 id="ocrTitle">파일에서 단어 가져오기</h2></div><button class="icon-button plain close-ocr" type="button" aria-label="닫기">×</button></div>
+      <label class="upload-zone" id="uploadZone">
+        <input type="file" id="imageInput" accept="image/*">
+        <span class="upload-icon"><svg viewBox="0 0 24 24"><path d="M4 7.5h3l1.4-2h7.2l1.4 2h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></span>
+        <strong>단어장 사진 선택</strong>
+        <small>AI가 복잡한 단어장을 분석해 줘요. 결과는 직접 수정할 수 있어요.</small>
+        <img id="imagePreview" alt="선택한 단어장 사진" class="hidden">
+      </label>
+      <div class="capture-actions"><label class="capture-button"><input type="file" id="cameraInput" accept="image/*" capture="environment"><span>⌾</span><strong>카메라로 촬영</strong></label><label class="capture-button"><input type="file" id="galleryInput" accept="image/*"><span>▧</span><strong>앨범에서 선택</strong></label></div>
+      <label class="excel-zone">
+        <input type="file" id="excelInput" accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/csv">
+        <span>↥</span><strong>엑셀 또는 CSV 불러오기</strong><small>열 이름은 영어, 뜻, 챕터(선택)를 사용하세요.</small>
+      </label>
+      <div id="ocrProgress" class="ocr-progress hidden"><div><i id="ocrProgressBar"></i></div><p id="ocrStatus">이미지를 읽고 있어요…</p></div>
+      <label class="ocr-result"><span>인식 결과 <small>아래 표에서 열을 맞춰 수정할 수 있어요.</small></span><textarea id="ocrText" rows="5" placeholder="example | 예시&#10;resilient | 회복력이 있는"></textarea></label>
+      <div id="importPreviewPanel" class="import-preview hidden"><div class="preview-heading"><strong>가져오기 미리보기</strong><small>영어·뜻·챕터를 마지막으로 확인하세요.</small></div><div id="importPreviewTable"></div><button class="button primary large" type="button" id="confirmImportButton">이 단어들 저장하기</button></div>
+      <div class="modal-actions"><button type="button" class="button ghost close-ocr">취소</button><button type="button" class="button primary" id="importOcrButton">단어로 추가</button></div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="chapterModal" role="dialog" aria-modal="true" aria-labelledby="chapterTitle">
+    <div class="modal-sheet compact-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-header"><div><p class="eyebrow">CHAPTER</p><h2 id="chapterTitle">학습 챕터</h2></div><button class="icon-button plain close-chapter" type="button" aria-label="닫기">×</button></div>
+      <label class="chapter-select-label"><span>현재 보고 있는 챕터</span><select id="chapterSelect"></select></label>
+      <div class="new-chapter-row"><input id="newChapterInput" placeholder="예: Day 3, 기말 대비"><button id="addChapterButton" class="button primary" type="button">추가</button></div>
+      <p class="modal-description">단어를 추가하거나 수정할 때 원하는 챕터에 넣을 수 있어요.</p>
+      <button class="button primary large close-chapter" type="button">확인</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

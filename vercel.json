@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/vocab.js": {
+      "maxDuration": 60
+    }
+  }
+}
